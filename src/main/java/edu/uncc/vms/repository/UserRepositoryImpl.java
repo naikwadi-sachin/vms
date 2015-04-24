@@ -1,5 +1,6 @@
 package edu.uncc.vms.repository;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -7,6 +8,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -49,6 +51,7 @@ public class UserRepositoryImpl implements UserRepository {
 			System.out.println("in user-repo chkuser = " + user.toString());
 		} catch (EmptyResultDataAccessException e) {
 		}
+		
 		System.out.println("checkUser1 user_id=" + userId);
 		//user.setUserId(userId);
 		return user;

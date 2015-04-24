@@ -37,13 +37,12 @@
 				<strong>Location: </strong>${event.city } ${event.state }
 			</p>
 
-
 		</div>
 		<div class="row">
 			<div class="col-md-10 col-md-offset-0">
 				<div class="panel panel-default">
 					<div class="panel-heading">
-						<strong class="">Make a Donation</strong>
+						<strong class="">Make Monetary Donation</strong>
 
 					</div>
 					<div class="panel-body">
@@ -52,9 +51,10 @@
 							class="form-horizontal" role="form">
 
 							<form:errors path="*" cssClass="text-danger" />
+
 							<fieldset>
-							
-							<form:hidden path="eventId" value="${donation.eventId }"/>
+
+								<form:hidden path="eventId" value="${donation.eventId }" />
 
 								<div class="form-group">
 									<form:label class="col-lg-2 control-label" path="amount"> 

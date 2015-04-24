@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import edu.uncc.vms.domain.DONATION_STATUS_CODE;
 import edu.uncc.vms.domain.DonationEntity;
+import edu.uncc.vms.domain.Item;
 import edu.uncc.vms.repository.DonationRepository;
 
 @Service("donationService")
@@ -23,6 +24,11 @@ public class DonationServiceImpl implements DonationService{
 	@Override
 	public ArrayList<DonationEntity> getDonations(DonationEntity donation) {
 		return donationRepository.getDonations(donation);
+	}
+
+	@Override
+	public DONATION_STATUS_CODE insertItemDonation(Item item) {
+		return donationRepository.insertItemDonation(item);
 	}
 
 }

@@ -25,9 +25,19 @@
 	</div>
 
 	<div class="container">
-		<h1 class="text-muted">Post new event</h1>
+		<h1 class="text-muted">
+
+			<c:choose>
+				<c:when test="${status=='1'}">Update event
+				</c:when>
+				<c:otherwise>Post new event
+				</c:otherwise>
+			</c:choose>
+		</h1>
+
+
 		<hr />
-		<form:form action="createPost" method="POST" modelAttribute="event">
+		<form:form action="${pageContext.request.contextPath}/createPost" method="POST" modelAttribute="event">
 
 			<form:errors path="*" cssClass="text-danger" />
 			<div class="form-group">
@@ -36,6 +46,8 @@
 				<form:input path="eventName" cssClass="form-control"
 					id="eventNameField" placeholder="Enter event name"></form:input>
 			</div>
+			
+			<form:hidden path="eventId" value="${event.eventId}"/>
 
 			<div class="form-group">
 				<label for="eventDescriptionField">Event description</label>
@@ -59,7 +71,21 @@
 					placeholder="Enter event city"></form:input>
 			</div>
 
-			<button type="submit" class="btn btn-primary">Post Event</button>
+
+
+
+			<c:choose>
+				<c:when test="${status=='1'}">
+					<button type="submit" class="btn btn-primary">Update Event
+					</button>
+					<input type="hidden" name="editEvent" value="1" />
+				</c:when>
+				<c:otherwise>
+					<button type="submit" class="btn btn-primary">Post Event</button>
+				</c:otherwise>
+			</c:choose>
+
+
 		</form:form>
 	</div>
 

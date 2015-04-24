@@ -2,12 +2,14 @@ package edu.uncc.vms.web;
 
 import java.util.Locale;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -41,7 +43,7 @@ public class UserController {
 	@RequestMapping(value = "/logoutUser", method = RequestMethod.GET)
 	public String logout(HttpServletRequest request) {
 		request.getSession().invalidate();
-		return "forward:/showPosts?status="+ControllerCodes.logoutSuccess;
+		return "forward:/showPosts?status=" + ControllerCodes.logoutSuccess;
 	}
 
 	@RequestMapping(value = "/registerUser", method = RequestMethod.GET)
@@ -65,11 +67,21 @@ public class UserController {
 		user.setEmail(login.getEmail());
 		user.setPassword(login.getPassword());
 		user.setUserType(login.getUserType());
-		user = facade.checkUser(user);
+
+		try {
+			user = facade.checkUser(user);
+		} catch (CannotGetJdbcConnectionException ce) {
+
+			ObjectError error = new ObjectError("invalidUser",
+					messages.getMessage("db.error", null, locale));
+			result.addError(error);
+			model.addAttribute("login", login);
+			return "login";
+		}
 		System.out.println("loginStatus = " + user);
 		if (user.getUserId() != 0) {
 			request.getSession().setAttribute("user", user);
-			return "forward:/showPosts?status="+ControllerCodes.loginSuccess;
+			return "forward:/showPosts?status=" + ControllerCodes.loginSuccess;
 		} else {
 			ObjectError error = new ObjectError("invalidUser",
 					messages.getMessage("user.invalid", null, locale));
@@ -87,25 +99,43 @@ public class UserController {
 			model.addAttribute("user", user);
 			return "register";
 		}
-		USER_STATUS_CODE status = facade.register(user);
-		System.out.println("registrationStatus = " + status);
-		if (status.equals(USER_STATUS_CODE.REGISTRATION_SUCCESS)) {
-			model.addAttribute("successMessage", messages.getMessage(
-					"user.registration.success",
-					new Object[] { user.getEmail() }, locale));
-			return "success";
-		} else if (status.equals(USER_STATUS_CODE.DUPLICATE_USER)) {
-			ObjectError error = new ObjectError("duplicateUser",
-					messages.getMessage("user.duplicate",
-							new Object[] { user.getEmail() }, locale));
-			errors.addError(error);
-		} else {
 
-			ObjectError error = new ObjectError("registrationError",
-					messages.getMessage("user.registration.error",
-							new Object[] { user.getEmail() }, locale));
-			errors.addError(error);
+		try {
+
+			USER_STATUS_CODE status = facade.register(user);
+			System.out.println("registrationStatus = " + status);
+			if (status.equals(USER_STATUS_CODE.REGISTRATION_SUCCESS)) {
+				model.addAttribute("successMessage", messages.getMessage(
+						"user.registration.success",
+						new Object[] { user.getEmail() }, locale));
+
+				try {
+					facade.sendEmail(user.getEmail(),
+							"Welcome to VMS community!",
+							"Your registration is confirmed, Thank you for joining..");
+				} catch (MessagingException e) {
+					e.printStackTrace();
+				}
+
+				return "success";
+			} else if (status.equals(USER_STATUS_CODE.DUPLICATE_USER)) {
+				ObjectError error = new ObjectError("duplicateUser",
+						messages.getMessage("user.duplicate",
+								new Object[] { user.getEmail() }, locale));
+				errors.addError(error);
+			} else {
+
+				ObjectError error = new ObjectError("registrationError",
+						messages.getMessage("user.registration.error",
+								new Object[] { user.getEmail() }, locale));
+				errors.addError(error);
+			}
+			return "register";
+		} catch (CannotGetJdbcConnectionException ce) {
+			model.addAttribute("dbError",
+					messages.getMessage("db.error", null, locale));
+			model.addAttribute("login", new LoginForm());
+			return "login";
 		}
-		return "register";
 	}
 }

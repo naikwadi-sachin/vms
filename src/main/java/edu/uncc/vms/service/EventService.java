@@ -19,4 +19,5 @@ public interface EventService {
 
 	public List<EventEntity> getUserPosts(EventEntity event);
 
+	public EVENT_STATUS_CODE editPost(EventEntity event);
 }

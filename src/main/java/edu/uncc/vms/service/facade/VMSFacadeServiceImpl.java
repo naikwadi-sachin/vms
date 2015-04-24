@@ -3,6 +3,9 @@ package edu.uncc.vms.service.facade;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +15,13 @@ import edu.uncc.vms.domain.DONATION_STATUS_CODE;
 import edu.uncc.vms.domain.DonationEntity;
 import edu.uncc.vms.domain.EVENT_STATUS_CODE;
 import edu.uncc.vms.domain.EventEntity;
+import edu.uncc.vms.domain.Item;
 import edu.uncc.vms.domain.USER_STATUS_CODE;
 import edu.uncc.vms.domain.UserEntity;
 import edu.uncc.vms.service.CommentService;
 import edu.uncc.vms.service.DonationService;
 import edu.uncc.vms.service.EventService;
+import edu.uncc.vms.service.NotificationService;
 import edu.uncc.vms.service.UserService;
 
 @Service("vmsFacadeService")
@@ -30,6 +35,8 @@ public class VMSFacadeServiceImpl implements VMSFacadeService{
 	private CommentService commentService;
 	@Autowired
 	private DonationService donationService;
+	@Autowired
+	private NotificationService notificationService;
 	
 	@Override
 	public UserEntity checkUser(UserEntity user) {
@@ -99,6 +106,23 @@ public class VMSFacadeServiceImpl implements VMSFacadeService{
 	@Override
 	public ArrayList<DonationEntity> getDonations(DonationEntity donation) {
 		return donationService.getDonations(donation);
+	}
+
+	@Override
+	public EVENT_STATUS_CODE editPost(EventEntity event) {
+		return eventService.editPost(event);
+	}
+
+	@Override
+	public void sendEmail(String toAddress, String subject, String message)
+			throws AddressException, MessagingException {
+		notificationService.sendEmail(toAddress, subject, message);
+		
+	}
+
+	@Override
+	public DONATION_STATUS_CODE insertItemDonation(Item item) {
+		return donationService.insertItemDonation(item);
 	}
 
 }

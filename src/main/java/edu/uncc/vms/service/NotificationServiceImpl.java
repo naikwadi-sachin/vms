@@ -20,14 +20,20 @@ public class NotificationServiceImpl implements NotificationService {
 
 	private String host = "smtp.gmail.com";
 	private String port = "587";
-	private String userName = "sachinmn39@gmail.com";
-	private String password = "sachin39";
+	private String userName = "info.vmsusa@gmail.com";
+	private String password = "admin@vms";
+	
+	private boolean sendNotifications = true;
 
 	@Override
 	public void sendEmail(String host, String port, String userName,
 			String password, String toAddress, String subject, String message)
 			throws AddressException, MessagingException {
 		// sets SMTP server properties
+		
+		if(!sendNotifications)
+			return;
+		
 		Properties properties = System.getProperties();
 		properties.put("mail.smtp.host", host);
 		properties.put("mail.smtp.port", port);
@@ -61,6 +67,10 @@ public class NotificationServiceImpl implements NotificationService {
 	public void sendEmail(String toAddress, String subject, String message)
 			throws AddressException, MessagingException {
 
+		System.out.println("sendEmail toAddress="+toAddress + ";subject="+ subject + ";message=" + message);
+		if(!sendNotifications)
+			return;
+		
 		// sets SMTP server properties
 		Properties properties = System.getProperties();
 		properties.put("mail.smtp.host", host);
@@ -100,5 +110,15 @@ public class NotificationServiceImpl implements NotificationService {
 		transport.sendMessage(msg, msg.getAllRecipients());
 
 	}
-
+	/*
+	public static void main(String args[])
+	{
+		NotificationServiceImpl s = new NotificationServiceImpl();
+		try {
+			s.sendEmail("vramcha1@uncc.edu", "test email", "test mail message");
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
+	}
+*/
 }

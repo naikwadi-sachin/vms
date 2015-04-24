@@ -71,7 +71,9 @@ public class EventRepositoryImpl implements EventRepository {
 
 	@Override
 	public EventEntity getPost(int eventId) {
-		String sql = "select event_id,user_id,event_name,event_description,city,state,event_date,created_date from vms_event where status='y' and event_id = ? limit 1";
+		try
+		{
+		String sql = "select event_id,user_id,event_name,event_description,city,state,event_date,created_date from vms_event where event_id = ? limit 1";
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		// int count = jdbcTemplate.execute(sql, eventId);
 		EventEntity event = jdbcTemplate.queryForObject(sql,
@@ -80,6 +82,12 @@ public class EventRepositoryImpl implements EventRepository {
 
 		System.out.println("getPost event=" + event);
 		return event;
+		}
+		catch(DataAccessException dae)
+		{
+			dae.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
@@ -150,6 +158,24 @@ public class EventRepositoryImpl implements EventRepository {
 		else
 			return EVENT_STATUS_CODE.EVENT_VOLUNTEER_ERROR;
 
+	}
+
+	@Override
+	public EVENT_STATUS_CODE editPost(EventEntity event) {
+
+		System.out.println("editPost " + event.toString());
+		String sql = "update vms_event "
+				+ "set event_name = ?,event_description = ?,event_date = ?,state =?,city=?,user_id=? "
+				+ "where event_id=?";
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+		int count = jdbcTemplate.update(sql, event.getEventName(),
+				event.getEventDescription(), event.getEventDate(),
+				event.getState(), event.getCity(), event.getUserId(), event.getEventId());
+		System.out.println("editPost count=" + count);
+		if (count > 0)
+			return EVENT_STATUS_CODE.EVENT_EDIT_SUCCESS;
+		else
+			return EVENT_STATUS_CODE.EVENT_EDIT_ERROR;
 	}
 
 }

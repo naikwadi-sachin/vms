@@ -17,6 +17,7 @@ import edu.uncc.vms.domain.EVENT_STATUS_CODE;
 import edu.uncc.vms.domain.EventEntity;
 import edu.uncc.vms.domain.UserEntity;
 import edu.uncc.vms.service.facade.VMSFacadeService;
+import edu.uncc.vms.web.form.ControllerCodes;
 
 @Controller
 public class VolunteerController {
@@ -39,11 +40,11 @@ public class VolunteerController {
 
 			EVENT_STATUS_CODE volunteerStatus = facade.volunteer(event);
 			if (volunteerStatus == EVENT_STATUS_CODE.EVENT_VOLUNTEER_DUPLICATE_ERROR) {
-				status = "1";
+				status = ControllerCodes.eventJoinDuplicate;
 			} else if (volunteerStatus == EVENT_STATUS_CODE.EVENT_VOLUNTEER_ERROR) {
-				status = "2";
+				status = ControllerCodes.eventJoinError;
 			} else if (volunteerStatus == EVENT_STATUS_CODE.EVENT_VOLUNTEER_SUCCESS) {
-				status = "3";
+				status = ControllerCodes.eventJoinSuccess;
 			}
 
 			System.out.println("volunteerStatus=" + volunteerStatus);
@@ -65,6 +66,6 @@ public class VolunteerController {
 			model.addAttribute("events", events);
 			return "myEvents";
 		}
-		return "";
+		return "login";
 	}
 }

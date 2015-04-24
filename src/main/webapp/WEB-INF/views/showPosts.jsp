@@ -116,11 +116,11 @@
 		<c:if test="${not empty deleteError}">
 			<div class="alert alert-danger" role="alert">${deleteError}</div>
 		</c:if>
-		
+
 		<c:if test="${not empty donationSuccess}">
 			<div class="alert alert-success" role="alert">${donationSuccess}</div>
 		</c:if>
-		
+
 		<c:if test="${not empty donationError}">
 			<div class="alert alert-danger" role="alert">${donationError}</div>
 		</c:if>
@@ -151,7 +151,6 @@
 
 							<c:if test="${sessionScope.user.userType =='u'}">
 
-
 								<td align="left"><a
 									href="${pageContext.request.contextPath}/join/${event.eventId }"><img
 										alt="Comments" title="Join this event"
@@ -159,7 +158,12 @@
 										height="24" width="24"></a></td>
 								<td align="left"><a
 									href="${pageContext.request.contextPath}/donate/${event.eventId }"><img
-										alt="Comments" title="Donate for this event"
+										alt="Comments" title="Donate funds($) for this event"
+										src="${pageContext.request.contextPath}/resources/images/donate.png"
+										height="24" width="24"></a></td>
+								<td align="left"><a
+									href="${pageContext.request.contextPath}/support/${event.eventId }"><img
+										alt="Comments" title="Donate items for this event"
 										src="${pageContext.request.contextPath}/resources/images/donate.png"
 										height="24" width="24"></a></td>
 								<td align="left"><a
@@ -171,23 +175,25 @@
 
 							<c:if test="${sessionScope.user.userType == 'a'}">
 								<td align="left"><a
-									href="${pageContext.request.contextPath}/deleteEvent/${event.eventId }"><img
-										alt="Comments" title="Delete this event"
-										src="${pageContext.request.contextPath}/resources/images/delete.png"
+									href="${pageContext.request.contextPath}/editEvent/${event.eventId }"><img
+										alt="Comments" title="Edit this event"
+										src="${pageContext.request.contextPath}/resources/images/edit.png"
 										height="24" width="24"></a></td>
+
 								<td align="left"><a
 									href="${pageContext.request.contextPath}/comments/${event.eventId }"><img
 										alt="Comments" title="Show Comments on this event"
 										src="${pageContext.request.contextPath}/resources/images/comment.png"
 										height="24" width="24"></a></td>
-							</c:if>
-							
-							<td align="left"><a
-									href="${pageContext.request.contextPath}/editEvent/${event.eventId }"><img
-										alt="Comments" title="Edit this event"
-										src="${pageContext.request.contextPath}/resources/images/edit.png"
+								<td align="left"><a
+									href="${pageContext.request.contextPath}/deleteEvent/${event.eventId }"><img
+										alt="Comments" title="Delete this event"
+										src="${pageContext.request.contextPath}/resources/images/delete.png"
 										height="24" width="24"></a></td>
-										
+							</c:if>
+
+
+
 						</tr>
 					</c:forEach>
 				</tbody>

@@ -45,4 +45,9 @@ public class EventServiceImpl implements EventService {
 		return eventRepository.getUserPosts(event);
 	}
 
+	@Override
+	public EVENT_STATUS_CODE editPost(EventEntity event) {
+		return eventRepository.editPost(event);
+	}
+
 }

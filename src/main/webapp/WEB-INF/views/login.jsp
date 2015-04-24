@@ -49,6 +49,12 @@
 						<form:form class="form-horizontal" role="form"
 							modelAttribute="login" action="validateUser" method="POST">
 							<form:errors path="*" cssClass="text-danger" />
+
+							<c:if test="${not empty dbError}">
+								<div class="alert alert-danger" role="alert">${dbError}</div>
+							</c:if>
+
+
 							<div class="form-group">
 								<label for="emailField" class="col-sm-3 control-label">Email</label>
 								<div class="col-sm-9">

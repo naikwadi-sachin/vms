@@ -13,5 +13,5 @@ public interface EventRepository {
 	public List<EventEntity> getPosts(EventEntity event);
 	public EVENT_STATUS_CODE volunteer(EventEntity event);
 	public List<EventEntity> getUserPosts(EventEntity event);
-	
+	public EVENT_STATUS_CODE editPost(EventEntity event);
 }
