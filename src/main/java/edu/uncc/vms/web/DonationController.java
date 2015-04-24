@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import edu.uncc.vms.domain.DONATION_STATUS_CODE;
 import edu.uncc.vms.domain.DonationEntity;
+import edu.uncc.vms.domain.DonationItem;
 import edu.uncc.vms.domain.EventEntity;
 import edu.uncc.vms.domain.Item;
 import edu.uncc.vms.domain.UserEntity;
@@ -165,7 +166,7 @@ public class DonationController {
 
 	@RequestMapping(value = "/showDonations", method = RequestMethod.GET)
 	public String showDonations(Model model) {
-		ArrayList<DonationEntity> donations = facade.getDonations(null);
+		ArrayList<DonationItem> donations = facade.getDonations(null);
 		model.addAttribute("donations", donations);
 		return "showDonations";
 	}

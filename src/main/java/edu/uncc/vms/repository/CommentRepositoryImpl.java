@@ -11,16 +11,13 @@ import org.springframework.stereotype.Repository;
 
 import edu.uncc.vms.domain.COMMENT_STATUS_CODE;
 import edu.uncc.vms.domain.CommentEntity;
-import edu.uncc.vms.domain.EventEntity;
 import edu.uncc.vms.domain.helper.CommentEntityMapper;
-import edu.uncc.vms.domain.helper.EventEntityMapper;
 
 @Repository("commentRepository")
 public class CommentRepositoryImpl implements CommentRepository {
 
 	@Autowired
 	private DataSource dataSource;
-	private int testUserId = 1;
 
 	@Override
 	public COMMENT_STATUS_CODE insertComment(CommentEntity comment) {

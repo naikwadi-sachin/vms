@@ -1,7 +1,6 @@
 package edu.uncc.vms.repository;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -12,11 +11,9 @@ import org.springframework.stereotype.Repository;
 
 import edu.uncc.vms.domain.DONATION_STATUS_CODE;
 import edu.uncc.vms.domain.DonationEntity;
-import edu.uncc.vms.domain.EVENT_STATUS_CODE;
-import edu.uncc.vms.domain.EventEntity;
+import edu.uncc.vms.domain.DonationItem;
 import edu.uncc.vms.domain.Item;
-import edu.uncc.vms.domain.helper.DonationEntityMapper;
-import edu.uncc.vms.domain.helper.EventEntityMapper;
+import edu.uncc.vms.domain.helper.DonationItemMapper;
 
 @Repository("donationRepository")
 public class DonationRepositoryImpl implements DonationRepository {
@@ -46,10 +43,14 @@ public class DonationRepositoryImpl implements DonationRepository {
 	}
 
 	@Override
-	public ArrayList<DonationEntity> getDonations(DonationEntity donation) {
+	public ArrayList<DonationItem> getDonations(DonationEntity donation) {
 
 		try {
-			String sql = " select event_id,user_id,amount,card_holder_name,billing_address,card_type,card_number,expiry_month,expiry_year,security_code,donation_date from vms_donation where 1=1 ";
+			String sql = " SELECT e.event_name, upper(concat(u.first_name,' ',u.last_name)) as user_name,u.email, 'Funds' as item_category, concat(d.amount,'$') as donation,d.donation_date "
+					+ "from vms_donation d inner join vms_event e on d.event_id = e.event_id inner join vms_user u on d.user_id = u.user_id "
+					+ "union "
+					+ "SELECT e.event_name, upper(concat(u.first_name,' ',u.last_name)) as user_name,u.email, d.item_category, d.item_description as donation,d.item_date as donation_date "
+					+ "from vms_donation_items d inner join vms_event e on d.event_id = e.event_id inner join vms_user u on d.user_id = u.user_id where 1=1 ";
 			String where = "";
 			String orderBy = " order by donation_date desc";
 			if (donation != null) {
@@ -59,8 +60,8 @@ public class DonationRepositoryImpl implements DonationRepository {
 
 			System.out.println("sql:" + sql);
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-			ArrayList<DonationEntity> donations = (ArrayList<DonationEntity>) jdbcTemplate
-					.query(sql, new DonationEntityMapper());
+			ArrayList<DonationItem> donations = (ArrayList<DonationItem>) jdbcTemplate
+					.query(sql, new DonationItemMapper());
 			return donations;
 		} catch (DataAccessException dae) {
 			dae.printStackTrace();

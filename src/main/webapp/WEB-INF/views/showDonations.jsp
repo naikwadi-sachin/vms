@@ -25,8 +25,8 @@
 	</div>
 
 	<div class="container">
-		<form:form id="form" method="post" modelAttribute=""
-			action="" class="form-horizontal" role="form">
+		<form:form id="form" method="post" modelAttribute="" action=""
+			class="form-horizontal" role="form">
 
 			<c:if test="${not empty searchResult}">
 				<div class="alert alert-warning" role="alert">${searchResult}</div>
@@ -49,7 +49,9 @@
 					<tr>
 						<th>Event Name</th>
 						<th>Donated by</th>
-						<th>Amount</th>
+						<th>Email</th>
+						<th>Donation Category</th>
+						<th>Donation</th>
 						<th>Date</th>
 						<th align="center" colspan="3"></th>
 					</tr>
@@ -57,9 +59,11 @@
 				<tbody>
 					<c:forEach var="donation" items="${donations}">
 						<tr>
-							<td><c:out value="${donation.eventId}" /></td>
-							<td><c:out value="${donation.cardHolderName}" /></td>
-							<td><c:out value="${donation.amount}" /></td>
+							<td><c:out value="${donation.eventName}" /></td>
+							<td><c:out value="${donation.userName}" /></td>
+							<td><c:out value="${donation.email}" /></td>
+							<td><c:out value="${donation.donationCategory}" /></td>
+							<td><c:out value="${donation.donation}" /></td>
 							<td><c:out value="${donation.donationDate}" /></td>
 						</tr>
 					</c:forEach>

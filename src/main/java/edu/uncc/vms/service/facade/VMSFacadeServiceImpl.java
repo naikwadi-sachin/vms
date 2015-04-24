@@ -13,6 +13,7 @@ import edu.uncc.vms.domain.COMMENT_STATUS_CODE;
 import edu.uncc.vms.domain.CommentEntity;
 import edu.uncc.vms.domain.DONATION_STATUS_CODE;
 import edu.uncc.vms.domain.DonationEntity;
+import edu.uncc.vms.domain.DonationItem;
 import edu.uncc.vms.domain.EVENT_STATUS_CODE;
 import edu.uncc.vms.domain.EventEntity;
 import edu.uncc.vms.domain.Item;
@@ -104,7 +105,7 @@ public class VMSFacadeServiceImpl implements VMSFacadeService{
 	}
 
 	@Override
-	public ArrayList<DonationEntity> getDonations(DonationEntity donation) {
+	public ArrayList<DonationItem> getDonations(DonationEntity donation) {
 		return donationService.getDonations(donation);
 	}
 
