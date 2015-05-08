@@ -1,9 +1,8 @@
-package edu.uncc.vms.web;
+package edu.uncc.vms.controller;
 
 import java.util.List;
 import java.util.Locale;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.servlet.ModelAndView;
 
 import edu.uncc.vms.domain.EVENT_STATUS_CODE;
@@ -28,6 +26,7 @@ import edu.uncc.vms.domain.EventEntity;
 import edu.uncc.vms.domain.UserEntity;
 import edu.uncc.vms.service.facade.VMSFacadeService;
 import edu.uncc.vms.web.form.ControllerCodes;
+import edu.uncc.vms.web.form.EventForm;
 import edu.uncc.vms.web.form.LoginForm;
 
 @Controller
@@ -42,11 +41,11 @@ public class EventController {
 
 	@RequestMapping(value = "/createPost", method = RequestMethod.GET)
 	public ModelAndView showPostView() {
-		return new ModelAndView("createPost", "event", new EventEntity());
+		return new ModelAndView("createPost", "event", new EventForm());
 	}
 
 	@RequestMapping(value = "/createPost", method = RequestMethod.POST)
-	public String post(@Valid @ModelAttribute("event") EventEntity event,
+	public String post(@Valid @ModelAttribute("event") EventForm event,
 			BindingResult result, HttpServletRequest request,
 			HttpSession session, Locale locale, Model model) {
 		System.out.println("posting event " + event.toString());
@@ -69,8 +68,18 @@ public class EventController {
 			return "createPost";
 		}
 
+		EventEntity sevent = new EventEntity();
+		sevent.setCity(event.getCity());
+		sevent.setCreatedDate(event.getCreatedDate());
+		sevent.setEventDate(event.getEventDate());
+		sevent.setEventDescription(event.getEventDescription());
+		sevent.setEventId(event.getEventId());
+		sevent.setEventName(event.getEventName());
+		sevent.setState(event.getState());
+		sevent.setUserId(event.getUserId());
+		
 		if (request.getParameter("editEvent") != null) {
-			EVENT_STATUS_CODE status = facade.editPost(event);
+			EVENT_STATUS_CODE status = facade.editPost(sevent);
 			System.out.println("eventUpdationStatus = " + status);
 
 			if (status.equals(EVENT_STATUS_CODE.EVENT_EDIT_SUCCESS)) {
@@ -85,7 +94,7 @@ public class EventController {
 				result.addError(error);
 			}
 		} else {
-			EVENT_STATUS_CODE status = facade.addPost(event);
+			EVENT_STATUS_CODE status = facade.addPost(sevent);
 			System.out.println("eventCreationStatus = " + status);
 
 			if (status.equals(EVENT_STATUS_CODE.EVENT_POST_SUCCESS)) {
@@ -97,7 +106,7 @@ public class EventController {
 					facade.sendEmail(user.getEmail(),
 							"Event " + event.getEventName() + " is posted!",
 							"Thank you for posting event in VMS");
-				} catch (MessagingException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 

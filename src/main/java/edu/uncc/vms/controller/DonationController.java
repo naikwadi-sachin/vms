@@ -1,9 +1,8 @@
-package edu.uncc.vms.web;
+package edu.uncc.vms.controller;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -27,6 +26,7 @@ import edu.uncc.vms.domain.Item;
 import edu.uncc.vms.domain.UserEntity;
 import edu.uncc.vms.service.facade.VMSFacadeService;
 import edu.uncc.vms.web.form.ControllerCodes;
+import edu.uncc.vms.web.form.DonationForm;
 
 @Controller
 public class DonationController {
@@ -42,21 +42,24 @@ public class DonationController {
 	public String nonMonetaryDonation(@PathVariable("eventId") int eventId,
 			Model model) {
 		System.out.println("nonMonetaryDonation eventId=" + eventId);
-		EventEntity event = facade.getPost(eventId);
+		EventEntity event = facade.getPost(
+				eventId);
 		model.addAttribute("event", event);
 		Item item = new Item();
 		item.setEventId(eventId);
 		model.addAttribute("item", item);
 		return "support";
 	}
-	
-	@RequestMapping(value="/support", method = RequestMethod.POST)
-	public String saveNonMonetaryDonation(@Valid @ModelAttribute("item") Item item, BindingResult result,HttpSession session,Locale locale, Model model)
-	{
+
+	@RequestMapping(value = "/support", method = RequestMethod.POST)
+	public String saveNonMonetaryDonation(
+			@Valid @ModelAttribute("item") Item item, BindingResult result,
+			HttpSession session, Locale locale, Model model) {
 		System.out.println("saveNonMonetaryDonation " + item);
 
 		if (result.hasErrors()) {
-			EventEntity event = facade.getPost(item.getEventId());
+			EventEntity event = facade.getPost(
+					item.getEventId());
 			model.addAttribute("event", event);
 			model.addAttribute("item", item);
 			return "support";
@@ -72,13 +75,15 @@ public class DonationController {
 					messages.getMessage("user.donation.unauthorized", null,
 							locale));
 			result.addError(error);
-			EventEntity event = facade.getPost(item.getEventId());
+			EventEntity event = facade.getPost(
+					item.getEventId());
 			model.addAttribute("event", event);
 			model.addAttribute("donation", item);
 			return "support";
 		}
 
-		DONATION_STATUS_CODE donationResult = facade.insertItemDonation(item);
+		DONATION_STATUS_CODE donationResult = facade
+				.insertItemDonation(item);
 		System.out.println("donationResult " + donationResult);
 		String status = "";
 		if (donationResult == DONATION_STATUS_CODE.DONATION_SUCCESS) {
@@ -88,8 +93,8 @@ public class DonationController {
 				facade.sendEmail(user.getEmail(),
 						"Your donations are received!",
 						"Thank you for donating " + item.getItemCategory()
-								+ " description : " + item.getItemDescription());
-			} catch (MessagingException e) {
+								+ " : " + item.getItemDescription());
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
@@ -103,7 +108,7 @@ public class DonationController {
 
 	@RequestMapping(value = "/donate/{eventId}", method = RequestMethod.GET)
 	public String donate(@PathVariable("eventId") int eventId, Model model) {
-		DonationEntity donation = new DonationEntity();
+		DonationForm donation = new DonationForm();
 		System.out.println("donate eventId=" + eventId);
 		donation.setEventId(eventId);
 		model.addAttribute("donation", donation);
@@ -114,7 +119,7 @@ public class DonationController {
 
 	@RequestMapping(value = "/donate", method = RequestMethod.POST)
 	public String acceptDonation(
-			@Valid @ModelAttribute("donation") DonationEntity donation,
+			@Valid @ModelAttribute("donation") DonationForm donation,
 			BindingResult result, HttpSession session, Locale locale,
 			Model model) {
 		System.out.println("acceptDonation " + donation);
@@ -142,7 +147,21 @@ public class DonationController {
 			return "makeDonation";
 		}
 
-		DONATION_STATUS_CODE donationResult = facade.insertDonation(donation);
+		DonationEntity sdonation = new DonationEntity();
+		sdonation.setAmount(donation.getAmount());
+		sdonation.setBillingAddress(donation.getBillingAddress());
+		sdonation.setCardHolderName(donation.getCardHolderName());
+		sdonation.setCardNumber(donation.getCardNumber());
+		sdonation.setCardType(donation.getCardType());
+		sdonation.setDonationDate(donation.getDonationDate());
+		sdonation.setDonationId(donation.getDonationId());
+		sdonation.setEventId(donation.getEventId());
+		sdonation.setExpiryMonth(donation.getExpiryMonth());
+		sdonation.setExpiryYear(donation.getExpiryYear());
+		sdonation.setSecurityCode(donation.getSecurityCode());
+		sdonation.setUserId(donation.getUserId());
+
+		DONATION_STATUS_CODE donationResult = facade.insertDonation(sdonation);
 		System.out.println("donationResult " + donationResult);
 		String status = "";
 		if (donationResult == DONATION_STATUS_CODE.DONATION_SUCCESS) {
@@ -153,7 +172,7 @@ public class DonationController {
 						"Your donations are received!",
 						"Thank you for donating " + donation.getAmount()
 								+ " $, your money will be utilized properly.");
-			} catch (MessagingException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
@@ -166,7 +185,7 @@ public class DonationController {
 
 	@RequestMapping(value = "/showDonations", method = RequestMethod.GET)
 	public String showDonations(Model model) {
-		ArrayList<DonationItem> donations = facade.getDonations(null);
+		ArrayList<DonationItem> donations = (ArrayList<DonationItem>) facade.getDonations(null);
 		model.addAttribute("donations", donations);
 		return "showDonations";
 	}

@@ -27,6 +27,7 @@
 	margin: 16px;
 }
 </style>
+
 </head>
 <body>
 	<script type="text/javascript"
@@ -53,7 +54,6 @@
 							<c:if test="${not empty dbError}">
 								<div class="alert alert-danger" role="alert">${dbError}</div>
 							</c:if>
-
 
 							<div class="form-group">
 								<label for="emailField" class="col-sm-3 control-label">Email</label>

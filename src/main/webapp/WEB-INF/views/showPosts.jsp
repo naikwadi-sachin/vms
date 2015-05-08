@@ -164,7 +164,7 @@
 								<td align="left"><a
 									href="${pageContext.request.contextPath}/support/${event.eventId }"><img
 										alt="Comments" title="Donate items for this event"
-										src="${pageContext.request.contextPath}/resources/images/donate.png"
+										src="${pageContext.request.contextPath}/resources/images/donate_item.png"
 										height="24" width="24"></a></td>
 								<td align="left"><a
 									href="${pageContext.request.contextPath}/comments/${event.eventId }"><img

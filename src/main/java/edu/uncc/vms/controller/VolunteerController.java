@@ -1,4 +1,4 @@
-package edu.uncc.vms.web;
+package edu.uncc.vms.controller;
 
 import java.util.List;
 import java.util.Locale;
@@ -22,8 +22,8 @@ import edu.uncc.vms.web.form.ControllerCodes;
 @Controller
 public class VolunteerController {
 
-	@Autowired
-	@Qualifier("vmsFacadeService")
+	 @Autowired
+	 @Qualifier("vmsFacadeService")
 	private VMSFacadeService facade;
 
 	@RequestMapping(value = "/join/{eventId}", method = { RequestMethod.GET })
@@ -38,13 +38,26 @@ public class VolunteerController {
 			event.setEventId(eventId);
 			event.setUserId(user.getUserId());
 
-			EVENT_STATUS_CODE volunteerStatus = facade.volunteer(event);
+			EVENT_STATUS_CODE volunteerStatus = facade
+					.volunteer(event);
 			if (volunteerStatus == EVENT_STATUS_CODE.EVENT_VOLUNTEER_DUPLICATE_ERROR) {
 				status = ControllerCodes.eventJoinDuplicate;
 			} else if (volunteerStatus == EVENT_STATUS_CODE.EVENT_VOLUNTEER_ERROR) {
 				status = ControllerCodes.eventJoinError;
 			} else if (volunteerStatus == EVENT_STATUS_CODE.EVENT_VOLUNTEER_SUCCESS) {
 				status = ControllerCodes.eventJoinSuccess;
+
+				EventEntity event1 = facade						.getPost(eventId);
+				try {
+					facade.sendEmail(
+							user.getEmail(),
+							"Join " + event1.getEventName() + " is posted!",
+							"User, " + user.getEmail()
+									+ " have successfully joined event :"
+									+ event1.getEventName() + " Thank you for joining VMS!");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 
 			System.out.println("volunteerStatus=" + volunteerStatus);

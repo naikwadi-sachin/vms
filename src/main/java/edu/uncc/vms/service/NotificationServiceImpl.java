@@ -23,7 +23,7 @@ public class NotificationServiceImpl implements NotificationService {
 	private String userName = "info.vmsusa@gmail.com";
 	private String password = "admin@vms";
 	
-	private boolean sendNotifications = true;
+	private boolean sendNotifications = false;
 
 	@Override
 	public void sendEmail(String host, String port, String userName,

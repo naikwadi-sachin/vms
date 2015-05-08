@@ -13,7 +13,7 @@
 		<spring.version>3.1.1.RELEASE</spring.version>
 		<spring.ws.version>2.0.0.RELEASE</spring.ws.version>
 		<log4j.version>1.2.16</log4j.version>
-		<context.path>vms-web</context.path>
+		<context.path>vms</context.path>
 		<org.slf4j-version>1.7.5</org.slf4j-version>
 	</properties>
 
@@ -207,7 +207,7 @@
 				<configuration>
 					<url>http://localhost:8443/manager/text</url>
 					<server>TomcatServer7</server>
-					<path>/vms</path>
+					<path>/${context.path}</path>
 				</configuration>
 			</plugin>
 

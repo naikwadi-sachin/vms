@@ -1,4 +1,4 @@
-package edu.uncc.vms.web;
+package edu.uncc.vms.controller;
 
 import java.util.List;
 import java.util.Locale;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 import edu.uncc.vms.domain.COMMENT_STATUS_CODE;
 import edu.uncc.vms.domain.CommentEntity;
-import edu.uncc.vms.domain.EVENT_STATUS_CODE;
 import edu.uncc.vms.domain.EventEntity;
 import edu.uncc.vms.domain.UserEntity;
 import edu.uncc.vms.service.facade.VMSFacadeService;
@@ -31,16 +30,17 @@ public class CommentController {
 	@Autowired
 	@Qualifier("vmsFacadeService")
 	private VMSFacadeService facade;
-	
+
 	@Autowired
 	private MessageSource messages;
 
 	@RequestMapping(value = "/comments/{eventId}", method = { RequestMethod.GET })
-	public String showComments(@PathVariable("eventId") int eventId,HttpServletRequest request,Locale locale, Model model) {
+	public String showComments(@PathVariable("eventId") int eventId,
+			HttpServletRequest request, Locale locale, Model model) {
 		System.out.println("showComments eventId=" + eventId);
 		// List<EventEntity> events = eventService.getPosts(event);
 		// System.out.println("showEvents events.size()=" + events.size());
-		
+
 		String status = request.getParameter("status");
 		if ("-1".equals(status))
 			model.addAttribute("commentError",
@@ -48,7 +48,7 @@ public class CommentController {
 		else if ("0".equals(status))
 			model.addAttribute("commentSuccess",
 					messages.getMessage("comment.delete.success", null, locale));
-		
+
 		CommentEntity comment = new CommentEntity();
 		comment.setEventId(eventId);
 		List<CommentEntity> comments = facade.getAllComments(comment);
@@ -61,7 +61,7 @@ public class CommentController {
 
 	@RequestMapping(value = "/comments", method = RequestMethod.POST)
 	public String addComment(@ModelAttribute("comment") CommentEntity comment,
-			HttpServletRequest request,Locale locale, Model model) {
+			HttpServletRequest request, Locale locale, Model model) {
 		System.out.println("addComment comment=" + comment.toString());
 		try {
 			UserEntity user = (UserEntity) request.getSession(false)
@@ -72,23 +72,20 @@ public class CommentController {
 		COMMENT_STATUS_CODE addCommentResult = facade.insertComment(comment);
 		System.out.println("addCommentResult=" + addCommentResult);
 		comment.setComment("");
-		
-		if(addCommentResult==COMMENT_STATUS_CODE.COMMENT_INSERT_SUCCESS)
-		{
+
+		if (addCommentResult == COMMENT_STATUS_CODE.COMMENT_INSERT_SUCCESS) {
 			model.addAttribute("commentSuccess",
 					messages.getMessage("comment.insert.success", null, locale));
-		}
-		else if(addCommentResult==COMMENT_STATUS_CODE.COMMENT_INSERT_SUCCESS)
-		{
+		} else if (addCommentResult == COMMENT_STATUS_CODE.COMMENT_INSERT_SUCCESS) {
 			model.addAttribute("commentError",
 					messages.getMessage("comment.insert.error", null, locale));
 		}
-		
+
 		model.addAttribute("comment", comment);
 		List<CommentEntity> comments = facade.getAllComments(comment);
 		System.out.println("addComment comments.size()=" + comments.size());
 		model.addAttribute("comments", comments);
-		
+
 		EventEntity event = facade.getPost(comment.getEventId());
 		model.addAttribute("event", event);
 		return "showComments";
@@ -110,6 +107,6 @@ public class CommentController {
 		} else if (commentStatus == COMMENT_STATUS_CODE.COMMENT_DELETE_SUCCESS) {
 			status = "0";
 		}
-		return "forward:/comments/" + eventId+"?status=" + status;
+		return "forward:/comments/" + eventId + "?status=" + status;
 	}
 }

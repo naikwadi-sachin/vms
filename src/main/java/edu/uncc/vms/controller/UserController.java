@@ -1,8 +1,7 @@
-package edu.uncc.vms.web;
+package edu.uncc.vms.controller;
 
 import java.util.Locale;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -24,6 +23,7 @@ import edu.uncc.vms.domain.UserEntity;
 import edu.uncc.vms.service.facade.VMSFacadeService;
 import edu.uncc.vms.web.form.ControllerCodes;
 import edu.uncc.vms.web.form.LoginForm;
+import edu.uncc.vms.web.form.UserForm;
 
 @Controller
 public class UserController {
@@ -48,7 +48,7 @@ public class UserController {
 
 	@RequestMapping(value = "/registerUser", method = RequestMethod.GET)
 	public ModelAndView showRegister() {
-		return new ModelAndView("register", "user", new UserEntity());
+		return new ModelAndView("register", "user", new UserForm());
 	}
 
 	@RequestMapping(value = "/validateUser", method = RequestMethod.POST)
@@ -92,7 +92,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/registerUser", method = RequestMethod.POST)
-	public String registerUser(@Valid @ModelAttribute("user") UserEntity user,
+	public String registerUser(@Valid @ModelAttribute("user") UserForm user,
 			BindingResult errors, Locale locale, Model model) {
 		System.out.println("registering user " + user.toString());
 		if (errors.hasErrors()) {
@@ -101,8 +101,15 @@ public class UserController {
 		}
 
 		try {
-
-			USER_STATUS_CODE status = facade.register(user);
+			UserEntity ruser = new UserEntity();
+			ruser.setEmail(user.getEmail());
+			ruser.setFirstName(user.getFirstName());
+			ruser.setLastName(user.getLastName());
+			ruser.setPassword(user.getPassword());
+			ruser.setUserId(user.getUserId());
+			ruser.setUserType(user.getUserType());
+			
+			USER_STATUS_CODE status = facade.register(ruser);
 			System.out.println("registrationStatus = " + status);
 			if (status.equals(USER_STATUS_CODE.REGISTRATION_SUCCESS)) {
 				model.addAttribute("successMessage", messages.getMessage(
@@ -113,7 +120,7 @@ public class UserController {
 					facade.sendEmail(user.getEmail(),
 							"Welcome to VMS community!",
 							"Your registration is confirmed, Thank you for joining..");
-				} catch (MessagingException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 
