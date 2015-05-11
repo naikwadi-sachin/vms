@@ -1,0 +1,1 @@
+INSERT INTO `vms_user` VALUES (1,'admin',NULL,'admin@gmail.com','admin','a','y')
