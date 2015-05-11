@@ -6,6 +6,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -27,6 +28,8 @@ import edu.uncc.vms.service.facade.VMSFacadeService;
 @SessionAttributes("user")
 public class CommentController {
 
+	private static final Logger logger = Logger.getLogger(CommentController.class);
+	
 	@Autowired
 	@Qualifier("vmsFacadeService")
 	private VMSFacadeService facade;
@@ -37,9 +40,9 @@ public class CommentController {
 	@RequestMapping(value = "/comments/{eventId}", method = { RequestMethod.GET })
 	public String showComments(@PathVariable("eventId") int eventId,
 			HttpServletRequest request, Locale locale, Model model) {
-		System.out.println("showComments eventId=" + eventId);
 		// List<EventEntity> events = eventService.getPosts(event);
-		// System.out.println("showEvents events.size()=" + events.size());
+//		logger.debug("showEvents events.size()=" + events.size());
+		logger.debug("showComments eventId=" + eventId);
 
 		String status = request.getParameter("status");
 		if ("-1".equals(status))
@@ -52,7 +55,7 @@ public class CommentController {
 		CommentEntity comment = new CommentEntity();
 		comment.setEventId(eventId);
 		List<CommentEntity> comments = facade.getAllComments(comment);
-		System.out.println("showComments comments.size()=" + comments.size());
+		logger.debug("showComments comments.size()=" + comments.size());
 		model.addAttribute("comments", comments);
 		model.addAttribute("comment", comment);
 		model.addAttribute("event", facade.getPost(eventId));
@@ -62,7 +65,7 @@ public class CommentController {
 	@RequestMapping(value = "/comments", method = RequestMethod.POST)
 	public String addComment(@ModelAttribute("comment") CommentEntity comment,
 			HttpServletRequest request, Locale locale, Model model) {
-		System.out.println("addComment comment=" + comment.toString());
+		logger.debug("addComment comment=" + comment.toString());
 		try {
 			UserEntity user = (UserEntity) request.getSession(false)
 					.getAttribute("user");
@@ -70,7 +73,7 @@ public class CommentController {
 		} catch (NullPointerException npe) {
 		}
 		COMMENT_STATUS_CODE addCommentResult = facade.insertComment(comment);
-		System.out.println("addCommentResult=" + addCommentResult);
+		logger.debug("addCommentResult=" + addCommentResult);
 		comment.setComment("");
 
 		if (addCommentResult == COMMENT_STATUS_CODE.COMMENT_INSERT_SUCCESS) {
@@ -83,7 +86,7 @@ public class CommentController {
 
 		model.addAttribute("comment", comment);
 		List<CommentEntity> comments = facade.getAllComments(comment);
-		System.out.println("addComment comments.size()=" + comments.size());
+		logger.debug("addComment comments.size()=" + comments.size());
 		model.addAttribute("comments", comments);
 
 		EventEntity event = facade.getPost(comment.getEventId());
@@ -94,13 +97,13 @@ public class CommentController {
 	@RequestMapping(value = "/deleteComment/{eventId}/{commentId}", method = RequestMethod.GET)
 	public String deleteComment(@PathVariable("eventId") int eventId,
 			@PathVariable("commentId") int commentId, HttpSession session) {
-		System.out.println("deleteComment commentId=" + commentId);
-		System.out.println("deleteComment eventId=" + eventId);
+		logger.debug("deleteComment commentId=" + commentId);
+		logger.debug("deleteComment eventId=" + eventId);
 		CommentEntity comment = new CommentEntity();
 		comment.setCommentId(commentId);
 		comment.setEventId(eventId);
 		COMMENT_STATUS_CODE commentStatus = facade.deleteComment(comment);
-		System.out.println("deleteComment commentStatus=" + commentStatus);
+		logger.debug("deleteComment commentStatus=" + commentStatus);
 		String status = "";
 		if (commentStatus == COMMENT_STATUS_CODE.COMMENT_DELETE_ERROR) {
 			status = "-1";

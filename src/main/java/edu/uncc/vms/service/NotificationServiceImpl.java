@@ -3,20 +3,21 @@ package edu.uncc.vms.service;
 import java.util.Date;
 import java.util.Properties;
 
-import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 @Service("notificationService")
 public class NotificationServiceImpl implements NotificationService {
+	
+	private static final Logger logger = Logger.getLogger(NotificationServiceImpl.class);
 
 	private String host = "smtp.gmail.com";
 	private String port = "587";
@@ -67,7 +68,7 @@ public class NotificationServiceImpl implements NotificationService {
 	public void sendEmail(String toAddress, String subject, String message)
 			throws AddressException, MessagingException {
 
-		System.out.println("sendEmail toAddress="+toAddress + ";subject="+ subject + ";message=" + message);
+		logger.debug("sendEmail toAddress="+toAddress + ";subject="+ subject + ";message=" + message);
 		if(!sendNotifications)
 			return;
 		
@@ -81,14 +82,6 @@ public class NotificationServiceImpl implements NotificationService {
 		properties.put("mail.smtp.socketFactory.port", "465");
 		properties.put("mail.smtp.socketFactory.fallback", "false");
 		// properties.put("mail.smtp.starttls.enable", "true");
-
-		// creates a new session with an authenticator
-		Authenticator auth = new Authenticator() {
-
-			public PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(userName, password);
-			}
-		};
 
 		Session session = Session.getDefaultInstance(properties, null);
 		session.setDebug(true);

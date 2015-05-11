@@ -1,10 +1,15 @@
 package edu.uncc.vms.util;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Properties;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import edu.uncc.vms.web.form.ControllerCodes;
 
@@ -38,13 +43,6 @@ public class SendEmail {
 		properties.put("mail.smtp.socketFactory.port", "465");
 		properties.put("mail.smtp.socketFactory.fallback", "false");
 //		properties.put("mail.smtp.starttls.enable", "true");
-
-		// creates a new session with an authenticator
-		Authenticator auth = new Authenticator() {
-			public PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(userName, password);
-			}
-		};
 
 		Session session = Session.getDefaultInstance(properties, null);
 		session.setDebug(true);

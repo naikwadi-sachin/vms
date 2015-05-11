@@ -1,5 +1,6 @@
 package edu.uncc.vms.controller;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Locale;
 
@@ -7,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -25,12 +27,16 @@ import edu.uncc.vms.domain.EVENT_STATUS_CODE;
 import edu.uncc.vms.domain.EventEntity;
 import edu.uncc.vms.domain.UserEntity;
 import edu.uncc.vms.service.facade.VMSFacadeService;
+import edu.uncc.vms.util.Utility;
 import edu.uncc.vms.web.form.ControllerCodes;
 import edu.uncc.vms.web.form.EventForm;
 import edu.uncc.vms.web.form.LoginForm;
 
 @Controller
 public class EventController {
+
+	private static final Logger logger = Logger
+			.getLogger(EventController.class);
 
 	@Autowired
 	@Qualifier("vmsFacadeService")
@@ -39,8 +45,14 @@ public class EventController {
 	@Autowired
 	private MessageSource messages;
 
+	@Autowired
+	private Utility utility;
+
 	@RequestMapping(value = "/createPost", method = RequestMethod.GET)
-	public ModelAndView showPostView() {
+	public ModelAndView showPostView(HttpSession session) {
+		if (session.getAttribute("user") == null) {
+			return new ModelAndView("login", "login", new LoginForm());
+		}
 		return new ModelAndView("createPost", "event", new EventForm());
 	}
 
@@ -48,9 +60,26 @@ public class EventController {
 	public String post(@Valid @ModelAttribute("event") EventForm event,
 			BindingResult result, HttpServletRequest request,
 			HttpSession session, Locale locale, Model model) {
-		System.out.println("posting event " + event.toString());
-		System.out.println("event mode" + request.getParameter("editEvent"));
+		logger.debug("posting event " + event.toString());
+		logger.debug("event mode" + request.getParameter("editEvent"));
 		UserEntity user;
+
+		try {
+			int status = utility.checkDate(event.getEventDate());
+			// logger.debug("date check status="+status);
+			if (status < 1) {
+				ObjectError error = new ObjectError("InvalidDate",
+						messages.getMessage("Future.event.eventDate",
+								new Object[] { event.getEventName() }, locale));
+				result.addError(error);
+			}
+		} catch (ParseException pe) {
+			ObjectError error = new ObjectError("InvalidDate",
+					messages.getMessage("Format.event.eventDate",
+							new Object[] { event.getEventName() }, locale));
+			result.addError(error);
+		}
+
 		if (result.hasErrors()) {
 			model.addAttribute("event", event);
 			return "createPost";
@@ -77,11 +106,10 @@ public class EventController {
 		sevent.setEventName(event.getEventName());
 		sevent.setState(event.getState());
 		sevent.setUserId(event.getUserId());
-		
+
 		if (request.getParameter("editEvent") != null) {
 			EVENT_STATUS_CODE status = facade.editPost(sevent);
-			System.out.println("eventUpdationStatus = " + status);
-
+			logger.debug("eventUpdationStatus = " + status);
 			if (status.equals(EVENT_STATUS_CODE.EVENT_EDIT_SUCCESS)) {
 				model.addAttribute("successMessage", messages.getMessage(
 						"event.edit.success",
@@ -95,7 +123,7 @@ public class EventController {
 			}
 		} else {
 			EVENT_STATUS_CODE status = facade.addPost(sevent);
-			System.out.println("eventCreationStatus = " + status);
+			logger.debug("eventCreationStatus = " + status);
 
 			if (status.equals(EVENT_STATUS_CODE.EVENT_POST_SUCCESS)) {
 				model.addAttribute("successMessage", messages.getMessage(
@@ -140,13 +168,13 @@ public class EventController {
 						.parseInt("" + request.getAttribute("eventId"));
 				event = facade.getPost(eventId);
 			}
-			System.out.println("showEvents eventId="
+			logger.debug("showEvents eventId="
 					+ request.getAttribute("eventId"));
 			if (session.getAttribute("eventId") != null) {
 				eventId = (Integer) session.getAttribute("eventId");
 				session.removeAttribute("eventId");
 			}
-			System.out.println("status=" + status);
+			logger.debug("status=" + status);
 			if (ControllerCodes.eventJoinError.equals(status))
 				model.addAttribute("joinError",
 						messages.getMessage("event.join.error", null, locale));
@@ -180,7 +208,7 @@ public class EventController {
 						"user.donation.error", null, locale));
 
 			List<EventEntity> events = facade.getPosts(null);
-			System.out.println("showEvents events.size()=" + events.size());
+			logger.debug("showEvents events.size()=" + events.size());
 			model.addAttribute("events", events);
 			model.addAttribute("event", new EventEntity());
 
@@ -209,9 +237,9 @@ public class EventController {
 			model.addAttribute("donationError",
 					messages.getMessage("user.donation.error", null, locale));
 
-		System.out.println("event search parameters=" + event.toString());
+		logger.debug("event search parameters=" + event.toString());
 		List<EventEntity> events = facade.getPosts(event);
-		System.out.println("showEvents events.size()=" + events.size());
+		logger.debug("showEvents events.size()=" + events.size());
 		if (events.size() == 0) {
 			model.addAttribute("searchResult",
 					messages.getMessage("event.search.result", null, locale));
@@ -223,14 +251,12 @@ public class EventController {
 
 	@RequestMapping(value = "/deleteEvent/{eventId}", method = RequestMethod.GET)
 	public String deleteEvent(@PathVariable("eventId") int eventId, Model model) {
-		System.out.println("in deleteEvent eventId=" + eventId);
-
+		logger.debug("in deleteEvent eventId=" + eventId);
 		EventEntity event = new EventEntity();
 		event.setEventId(eventId);
 		EVENT_STATUS_CODE eventDeleteResult = facade.deletePost(event);
 		String status = "";
-		System.out
-				.println("deleteEvent eventDeleteResult=" + eventDeleteResult);
+		logger.debug("deleteEvent eventDeleteResult=" + eventDeleteResult);
 		if (eventDeleteResult == EVENT_STATUS_CODE.EVENT_DELETE_SUCCESS)
 			status = ControllerCodes.eventDeleteSuccess;
 		else if (eventDeleteResult == EVENT_STATUS_CODE.EVENT_DELETE_ERROR)
@@ -241,7 +267,7 @@ public class EventController {
 
 	@RequestMapping(value = "/editEvent/{eventId}", method = RequestMethod.GET)
 	public String editEvent(@PathVariable("eventId") int eventId, Model model) {
-		System.out.println("in editEvent eventId=" + eventId);
+		logger.debug("in editEvent eventId=" + eventId);
 		EventEntity event = facade.getPost(eventId);
 		model.addAttribute("event", event);
 		model.addAttribute("status", "1");

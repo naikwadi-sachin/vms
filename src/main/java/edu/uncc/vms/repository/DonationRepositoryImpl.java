@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,13 +19,15 @@ import edu.uncc.vms.domain.helper.DonationItemMapper;
 @Repository("donationRepository")
 public class DonationRepositoryImpl implements DonationRepository {
 
+	private static final Logger logger = Logger.getLogger(DonationRepositoryImpl.class);
+	
 	@Autowired
 	private DataSource dataSource;
 
 	@Override
 	public DONATION_STATUS_CODE insertDonation(DonationEntity donation) {
 
-		System.out.println("insertDonation " + donation.toString());
+		logger.debug("insertDonation " + donation.toString());
 		String sql = "insert into vms_donation(event_id,user_id,amount,card_holder_name,billing_address,"
 				+ "card_type,card_number,expiry_month,expiry_year,security_code) "
 				+ "values(?,?,?,?,?,?,?,?,?,?)";
@@ -35,7 +38,7 @@ public class DonationRepositoryImpl implements DonationRepository {
 				donation.getCardType(), donation.getCardNumber(),
 				donation.getExpiryMonth(), donation.getExpiryYear(),
 				donation.getSecurityCode());
-		System.out.println("insertDonation count=" + count);
+		logger.debug("insertDonation count=" + count);
 		if (count > 0)
 			return DONATION_STATUS_CODE.DONATION_SUCCESS;
 		else
@@ -57,8 +60,8 @@ public class DonationRepositoryImpl implements DonationRepository {
 			}
 
 			sql = sql + where + orderBy;
+			logger.debug("sql:" + sql);
 
-			System.out.println("sql:" + sql);
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 			ArrayList<DonationItem> donations = (ArrayList<DonationItem>) jdbcTemplate
 					.query(sql, new DonationItemMapper());
@@ -80,7 +83,8 @@ public class DonationRepositoryImpl implements DonationRepository {
 				item.getUserId(), item.getItemCategory(),
 				item.getItemDescription()
 				);
-		System.out.println("insertItemDonation count=" + count);
+		logger.debug("insertItemDonation count=" + count);
+		
 		if (count > 0)
 			return DONATION_STATUS_CODE.DONATION_SUCCESS;
 		else

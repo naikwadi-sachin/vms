@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,8 @@ import edu.uncc.vms.domain.helper.CommentEntityMapper;
 @Repository("commentRepository")
 public class CommentRepositoryImpl implements CommentRepository {
 
+	private static final Logger logger = Logger.getLogger(CommentRepositoryImpl.class);
+	
 	@Autowired
 	private DataSource dataSource;
 
@@ -25,8 +28,7 @@ public class CommentRepositoryImpl implements CommentRepository {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		int count = jdbcTemplate.update(sql, comment.getEventId(),
 				comment.getUserId(), comment.getComment());
-		System.out.println("insertComment count=" + count);
-
+		logger.debug("insertComment count=" + count);
 		if (count > 0)
 			return COMMENT_STATUS_CODE.COMMENT_INSERT_SUCCESS;
 		else
@@ -40,8 +42,7 @@ public class CommentRepositoryImpl implements CommentRepository {
 
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		int count = jdbcTemplate.update(sql, comment.getCommentId());
-		System.out.println("deleteComment count=" + count);
-
+		logger.debug("deleteComment count=" + count);
 		if (count == 1)
 			return COMMENT_STATUS_CODE.COMMENT_DELETE_SUCCESS;
 		else

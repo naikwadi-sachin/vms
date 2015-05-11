@@ -6,6 +6,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -31,6 +32,7 @@ import edu.uncc.vms.web.form.DonationForm;
 @Controller
 public class DonationController {
 
+	private static final Logger logger = Logger.getLogger(DonationController.class);
 	@Autowired
 	@Qualifier("vmsFacadeService")
 	private VMSFacadeService facade;
@@ -41,7 +43,7 @@ public class DonationController {
 	@RequestMapping(value = "/support/{eventId}", method = RequestMethod.GET)
 	public String nonMonetaryDonation(@PathVariable("eventId") int eventId,
 			Model model) {
-		System.out.println("nonMonetaryDonation eventId=" + eventId);
+		logger.debug("nonMonetaryDonation eventId=" + eventId);
 		EventEntity event = facade.getPost(
 				eventId);
 		model.addAttribute("event", event);
@@ -55,8 +57,7 @@ public class DonationController {
 	public String saveNonMonetaryDonation(
 			@Valid @ModelAttribute("item") Item item, BindingResult result,
 			HttpSession session, Locale locale, Model model) {
-		System.out.println("saveNonMonetaryDonation " + item);
-
+		logger.debug("saveNonMonetaryDonation " + item);
 		if (result.hasErrors()) {
 			EventEntity event = facade.getPost(
 					item.getEventId());
@@ -84,7 +85,7 @@ public class DonationController {
 
 		DONATION_STATUS_CODE donationResult = facade
 				.insertItemDonation(item);
-		System.out.println("donationResult " + donationResult);
+		logger.debug("donationResult " + donationResult);
 		String status = "";
 		if (donationResult == DONATION_STATUS_CODE.DONATION_SUCCESS) {
 			status = ControllerCodes.donationSuccess;
@@ -109,7 +110,7 @@ public class DonationController {
 	@RequestMapping(value = "/donate/{eventId}", method = RequestMethod.GET)
 	public String donate(@PathVariable("eventId") int eventId, Model model) {
 		DonationForm donation = new DonationForm();
-		System.out.println("donate eventId=" + eventId);
+		logger.debug("donate eventId=" + eventId);
 		donation.setEventId(eventId);
 		model.addAttribute("donation", donation);
 		EventEntity event = facade.getPost(eventId);
@@ -122,8 +123,7 @@ public class DonationController {
 			@Valid @ModelAttribute("donation") DonationForm donation,
 			BindingResult result, HttpSession session, Locale locale,
 			Model model) {
-		System.out.println("acceptDonation " + donation);
-
+		logger.debug("acceptDonation " + donation);
 		if (result.hasErrors()) {
 			EventEntity event = facade.getPost(donation.getEventId());
 			model.addAttribute("event", event);
@@ -162,7 +162,7 @@ public class DonationController {
 		sdonation.setUserId(donation.getUserId());
 
 		DONATION_STATUS_CODE donationResult = facade.insertDonation(sdonation);
-		System.out.println("donationResult " + donationResult);
+		logger.debug("donationResult " + donationResult);
 		String status = "";
 		if (donationResult == DONATION_STATUS_CODE.DONATION_SUCCESS) {
 			status = ControllerCodes.donationSuccess;

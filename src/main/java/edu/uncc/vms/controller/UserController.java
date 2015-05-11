@@ -5,6 +5,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -28,6 +29,8 @@ import edu.uncc.vms.web.form.UserForm;
 @Controller
 public class UserController {
 
+	private static final Logger logger = Logger.getLogger(UserController.class);
+	
 	@Autowired
 	private MessageSource messages;
 
@@ -56,13 +59,13 @@ public class UserController {
 			BindingResult result, HttpServletRequest request, Locale locale,
 			Model model) {
 		if (result.hasErrors()) {
-			System.out.println("user form has errors : "
+			logger.debug("user form has errors : "
 					+ result.getErrorCount());
 			model.addAttribute("login", login);
 			return "login";
 		}
 
-		System.out.println("Validating user " + login.toString());
+		logger.debug("Validating user " + login.toString());
 		UserEntity user = new UserEntity();
 		user.setEmail(login.getEmail());
 		user.setPassword(login.getPassword());
@@ -78,7 +81,7 @@ public class UserController {
 			model.addAttribute("login", login);
 			return "login";
 		}
-		System.out.println("loginStatus = " + user);
+		logger.debug("loginStatus = " + user);
 		if (user.getUserId() != 0) {
 			request.getSession().setAttribute("user", user);
 			return "forward:/showPosts?status=" + ControllerCodes.loginSuccess;
@@ -94,7 +97,7 @@ public class UserController {
 	@RequestMapping(value = "/registerUser", method = RequestMethod.POST)
 	public String registerUser(@Valid @ModelAttribute("user") UserForm user,
 			BindingResult errors, Locale locale, Model model) {
-		System.out.println("registering user " + user.toString());
+		logger.debug("registering user " + user.toString());
 		if (errors.hasErrors()) {
 			model.addAttribute("user", user);
 			return "register";
@@ -110,7 +113,7 @@ public class UserController {
 			ruser.setUserType(user.getUserType());
 			
 			USER_STATUS_CODE status = facade.register(ruser);
-			System.out.println("registrationStatus = " + status);
+			logger.debug("registrationStatus = " + status);
 			if (status.equals(USER_STATUS_CODE.REGISTRATION_SUCCESS)) {
 				model.addAttribute("successMessage", messages.getMessage(
 						"user.registration.success",

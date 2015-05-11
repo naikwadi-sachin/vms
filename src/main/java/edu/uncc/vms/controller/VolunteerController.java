@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -22,14 +23,15 @@ import edu.uncc.vms.web.form.ControllerCodes;
 @Controller
 public class VolunteerController {
 
-	 @Autowired
-	 @Qualifier("vmsFacadeService")
+	private static final Logger logger = Logger.getLogger(VolunteerController.class);
+	@Autowired
+	@Qualifier("vmsFacadeService")
 	private VMSFacadeService facade;
 
 	@RequestMapping(value = "/join/{eventId}", method = { RequestMethod.GET })
 	public String joinEvent(@PathVariable("eventId") int eventId,
 			HttpSession session, Model model) {
-		System.out.println("joinEvent eventId=" + eventId);
+		logger.debug("joinEvent eventId=" + eventId);
 		String status = "0";
 		if (session.getAttribute("user") != null) {
 			status = "1";
@@ -38,8 +40,7 @@ public class VolunteerController {
 			event.setEventId(eventId);
 			event.setUserId(user.getUserId());
 
-			EVENT_STATUS_CODE volunteerStatus = facade
-					.volunteer(event);
+			EVENT_STATUS_CODE volunteerStatus = facade.volunteer(event);
 			if (volunteerStatus == EVENT_STATUS_CODE.EVENT_VOLUNTEER_DUPLICATE_ERROR) {
 				status = ControllerCodes.eventJoinDuplicate;
 			} else if (volunteerStatus == EVENT_STATUS_CODE.EVENT_VOLUNTEER_ERROR) {
@@ -47,20 +48,20 @@ public class VolunteerController {
 			} else if (volunteerStatus == EVENT_STATUS_CODE.EVENT_VOLUNTEER_SUCCESS) {
 				status = ControllerCodes.eventJoinSuccess;
 
-				EventEntity event1 = facade						.getPost(eventId);
+				EventEntity event1 = facade.getPost(eventId);
 				try {
-					facade.sendEmail(
-							user.getEmail(),
+					facade.sendEmail(user.getEmail(),
 							"Join " + event1.getEventName() + " is posted!",
 							"User, " + user.getEmail()
 									+ " have successfully joined event :"
-									+ event1.getEventName() + " Thank you for joining VMS!");
+									+ event1.getEventName()
+									+ " Thank you for joining VMS!");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 
-			System.out.println("volunteerStatus=" + volunteerStatus);
+			logger.debug("volunteerStatus=" + volunteerStatus);
 			session.setAttribute("eventId", eventId);
 		}
 		return "forward:/showPosts?status=" + status;
@@ -75,7 +76,7 @@ public class VolunteerController {
 			EventEntity event = new EventEntity();
 			event.setUserId(user.getUserId());
 			List<EventEntity> events = facade.getUserPosts(event);
-			System.out.println("showMyEvents events.size()=" + events.size());
+			logger.debug("showMyEvents events.size()=" + events.size());
 			model.addAttribute("events", events);
 			return "myEvents";
 		}

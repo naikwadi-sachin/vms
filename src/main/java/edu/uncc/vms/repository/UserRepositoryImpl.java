@@ -1,19 +1,13 @@
 package edu.uncc.vms.repository;
 
-import java.sql.SQLException;
-import java.util.Map;
-
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import edu.uncc.vms.domain.USER_STATUS_CODE;
@@ -22,22 +16,10 @@ import edu.uncc.vms.domain.UserEntity;
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
+	private static final Logger logger = Logger.getLogger(UserRepositoryImpl.class);
+	
 	@Autowired
 	private DataSource dataSource;
-
-	private SimpleJdbcCall jdbcCall;
-
-	/*
-	 * @Override public boolean checkUser(UserEntity user) { SqlParameterSource
-	 * in = new MapSqlParameterSource().addValue("in_email",
-	 * user.getEmail()).addValue("in_password", user.getPassword());
-	 * this.jdbcCall = new
-	 * SimpleJdbcCall(dataSource).withProcedureName("check_user"); Map<String,
-	 * Object> out = jdbcCall.execute(in);
-	 * System.out.println("email="+out.get("email"));
-	 * System.out.println("user_exists="+out.get("user_exists"));
-	 * if(!(out.get("user_exists")==null)) return true; return false; }
-	 */
 
 	@Override
 	public UserEntity checkUser(UserEntity user) {
@@ -48,12 +30,11 @@ public class UserRepositoryImpl implements UserRepository {
 //			userId = jdbcTemplate.queryForInt(sql, user.getEmail(),
 //					user.getPassword(),user.getUserType());
 			user = jdbcTemplate.queryForObject(sql, new Object[]{user.getEmail(),user.getPassword()}, new BeanPropertyRowMapper<UserEntity>(UserEntity.class));
-			System.out.println("in user-repo chkuser = " + user.toString());
+			logger.debug("in user-repo chkuser = " + user.toString());
 		} catch (EmptyResultDataAccessException e) {
 		}
 		
-		System.out.println("checkUser1 user_id=" + userId);
-		//user.setUserId(userId);
+		logger.debug("checkUser1 user_id=" + userId);
 		return user;
 	}
 
@@ -65,7 +46,7 @@ public class UserRepositoryImpl implements UserRepository {
 		try {
 			int count = jdbcTemplate.update(sql, user.getFirstName(),
 					user.getLastName(), user.getEmail(), user.getPassword());
-			System.out.println("addUser count=" + count);
+			logger.debug("addUser count=" + count);
 			if (count > 0)
 				return USER_STATUS_CODE.REGISTRATION_SUCCESS;
 			else

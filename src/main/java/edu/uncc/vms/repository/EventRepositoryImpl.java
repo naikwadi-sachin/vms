@@ -1,28 +1,26 @@
 package edu.uncc.vms.repository;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
-
 import edu.uncc.vms.domain.EVENT_STATUS_CODE;
 import edu.uncc.vms.domain.EventEntity;
-import edu.uncc.vms.domain.UserEntity;
 import edu.uncc.vms.domain.helper.EventEntityMapper;
 import edu.uncc.vms.util.Utility;
 
 @Repository("eventRepository")
 public class EventRepositoryImpl implements EventRepository {
 
+	private static final Logger logger = Logger.getLogger(EventRepositoryImpl.class);
+	
 	@Autowired
 	private DataSource dataSource;
 
@@ -33,13 +31,13 @@ public class EventRepositoryImpl implements EventRepository {
 
 	@Override
 	public EVENT_STATUS_CODE addPost(EventEntity event) {
-		System.out.println("addPost " + event.toString());
+		logger.debug("addPost " + event.toString());
 		String sql = "insert into vms_event(event_name,event_description,event_date,state,city,user_id) values(?,?,?,?,?,?)";
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		int count = jdbcTemplate.update(sql, event.getEventName(),
 				event.getEventDescription(), event.getEventDate(),
 				event.getState(), event.getCity(), event.getUserId());
-		System.out.println("addPost count=" + count);
+		logger.debug("addPost count=" + count);
 		if (count > 0)
 			return EVENT_STATUS_CODE.EVENT_POST_SUCCESS;
 		else
@@ -51,15 +49,16 @@ public class EventRepositoryImpl implements EventRepository {
 		String sql = "update vms_event set status = 'n' where event_id=?";
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		int count = jdbcTemplate.update(sql, event.getEventId());
-		System.out.println("deletePost count=" + count);
+		logger.debug("deletePost count=" + count);
+		
 		if (count > 0) {
 			try {
 				String sqlNew = "update vms_comments set status = 'n' where event_id=?";
 				int countNew = jdbcTemplate.update(sqlNew, event.getEventId());
-				System.out.println("deletePost deletecomments countNew="
+				logger.debug("deletePost deletecomments countNew="
 						+ countNew);
 			} catch (Exception e) {
-				System.out.println("exception in deletePost " + e.getMessage());
+				logger.error("exception in deletePost " + e.getMessage());
 			}
 			return EVENT_STATUS_CODE.EVENT_DELETE_SUCCESS;
 
@@ -80,7 +79,8 @@ public class EventRepositoryImpl implements EventRepository {
 				new Object[] { eventId },
 				new BeanPropertyRowMapper<EventEntity>(EventEntity.class));
 
-		System.out.println("getPost event=" + event);
+		logger.debug("getPost event=" + event);
+		
 		return event;
 		}
 		catch(DataAccessException dae)
@@ -115,7 +115,7 @@ public class EventRepositoryImpl implements EventRepository {
 
 		sql = sql + where + orderBy;
 
-		System.out.println("sql:" + sql);
+		logger.debug("sql:" + sql);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		List<EventEntity> events = jdbcTemplate.query(sql,
 				new EventEntityMapper());
@@ -133,7 +133,7 @@ public class EventRepositoryImpl implements EventRepository {
 
 		sql = sql + form + where + orderBy;
 
-		System.out.println("getUserPosts sql:" + sql);
+		logger.debug("getUserPosts sql:" + sql);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		List<EventEntity> events = jdbcTemplate.query(sql,
 				new EventEntityMapper());
@@ -142,7 +142,7 @@ public class EventRepositoryImpl implements EventRepository {
 
 	@Override
 	public EVENT_STATUS_CODE volunteer(EventEntity event) {
-		System.out.println("volunteer = " + event.toString());
+		logger.debug("volunteer = " + event.toString());
 		String sql = "insert into vms_user_events(user_id,event_id) values(?,?)";
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		int count = 0;
@@ -152,7 +152,7 @@ public class EventRepositoryImpl implements EventRepository {
 		} catch (DataAccessException e) {
 			return EVENT_STATUS_CODE.EVENT_VOLUNTEER_DUPLICATE_ERROR;
 		}
-		System.out.println("volunteer count=" + count);
+		logger.debug("volunteer count=" + count);
 		if (count > 0)
 			return EVENT_STATUS_CODE.EVENT_VOLUNTEER_SUCCESS;
 		else
@@ -163,7 +163,7 @@ public class EventRepositoryImpl implements EventRepository {
 	@Override
 	public EVENT_STATUS_CODE editPost(EventEntity event) {
 
-		System.out.println("editPost " + event.toString());
+		logger.debug("editPost " + event.toString());
 		String sql = "update vms_event "
 				+ "set event_name = ?,event_description = ?,event_date = ?,state =?,city=?,user_id=? "
 				+ "where event_id=?";
@@ -171,7 +171,8 @@ public class EventRepositoryImpl implements EventRepository {
 		int count = jdbcTemplate.update(sql, event.getEventName(),
 				event.getEventDescription(), event.getEventDate(),
 				event.getState(), event.getCity(), event.getUserId(), event.getEventId());
-		System.out.println("editPost count=" + count);
+		logger.debug("editPost count=" + count);
+		
 		if (count > 0)
 			return EVENT_STATUS_CODE.EVENT_EDIT_SUCCESS;
 		else
